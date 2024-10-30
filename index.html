@@ -1,0 +1,143 @@
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Folder Builder</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: #1A1A1A;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background-color: #121212;
+            padding: 3rem; /* Increased padding */
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+        }
+        h1 {
+            color: #E6D8CE;
+            margin-bottom: 2rem;
+            font-size: 2rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            margin-top: -1rem;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        input {
+            width: calc(100% - 2rem);
+            padding: 1rem; /* Increased padding */
+            margin-bottom: 1rem;
+            border: 1px solid #4a5568;
+            border-radius: 5px;
+            font-size: 1rem;
+            background-color: #2d3748;
+            color: #E6D8CE;
+        }
+        button {
+            background-color: #E86D4C;
+            color: #E6D8CE;
+            border: none;
+            padding: 1rem 2rem; /* Increased padding */
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            width: 100%;
+        }
+        button:hover {
+            background-color: rgba(232, 109, 76, 0.2);
+        }
+        button i {
+            margin-right: 8px;
+        }
+        #result {
+            margin-top: 1.5rem;
+            text-align: left;
+            white-space: pre-wrap;
+            background-color: #2d3748;
+            padding: 1.5rem; /* Increased padding */
+            border-radius: 5px;
+            display: none;
+            color: #718096;
+        }
+        #loading {
+            display: none;
+            margin-top: 1rem;
+            color: #718096;
+        }
+        #projectName {
+            margin-top: 1rem;
+            border: 1px solid #4a5568;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Project Folder Builder</h1>
+        <input type="text" id="projectName" placeholder="What’s your project called?" autofocus>
+        <button onclick="createAndDownloadZip()">Create Project Structure <i class="fas fa-download"></i></button>
+        <div id="loading">Creating zip file...</div>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        document.getElementById('projectName').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                createAndDownloadZip();
+            }
+        });
+
+        async function createAndDownloadZip() {
+            const projectName = document.getElementById('projectName').value.trim().toUpperCase();
+            if (!projectName) {
+                alert('Please enter a project name.');
+                return;
+            }
+
+            const loadingDiv = document.getElementById('loading');
+            loadingDiv.style.display = 'block';
+
+            const folders = [
+                `${projectName}/IMPORT/`,
+                `${projectName}/PRODUCTION/`,
+                `${projectName}/AUDIO/`,
+                `${projectName}/EDITED/`
+            ];
+
+            const zip = new JSZip();
+
+            folders.forEach(folder => {
+                zip.folder(folder);
+            });
+
+            try {
+                const content = await zip.generateAsync({type:"blob"});
+                saveAs(content, `${projectName}_folder_structure.zip`);
+
+                const structure = folders.join('\n');
+                const result = document.getElementById('result');
+                result.textContent = `Folder structure created:\n\n${structure}`;
+                result.style.display = 'block';
+            } catch (err) {
+                console.error('Error creating zip file:', err);
+                alert('An error occurred while creating the zip file. Please try again.');
+            } finally {
+                loadingDiv.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>
